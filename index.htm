@@ -1,0 +1,509 @@
+<?php
+	include '../base/lc_header.php';
+	include '../base/lc_util.php';
+?>
+
+<!--------------------------- Body Begin ---------------------------------------->
+
+<div class="Section1">
+
+<br>
+<h1>◈네트워크 라이브러리◈</h1>
+<br>이번 장에서는 앞서 배웠던 소켓 프로그램 내용을 바탕으로 네트워크 라이브러리를 만들어
+<br>보겠습니다. 라이브러리는C++을 이용해서 객체+함수로 구성하고 입/출력을 좀 더 원활하게
+<br>하기 위한 코드들을 추가할 계획입니다. 이것이 완성이 된다면 서버군을 제작하는데 있어서
+<br>기본적인 코드들은 모두가 끝이 납니다.
+<br>
+<br>
+<br>
+<br><h2>1. Message Queue</h2>
+<br>먼저 큐(Queue) 에 대한 이야기를 시작하겠습니다. 큐란 자료구조의 한 종류로 먼저 도착한
+<br>자료를 먼저 처리하는 FIFO(Fist In Fist Out) 선입 선출 구조입니다. 간단히 실생활의 예와
+<br>비교한다면 큐는 은행 창구 앞에서 줄을 서서 번호표를 가지고 기다리는 것과 유사합니다.
+<br>이러한 것을 컴퓨터의 알고리듬으로 만든 것이 큐입니다.
+<br>
+<br>
+<IMG src="https://github.com/3dapi/dv05_netlib/raw/master/img_netlib/nwque.png" BORDER="0">
+<br>
+<br>
+<br>좀 더 자세한 큐의 구조는 다른 책이나 자료를 살펴보도록 하고 네트워크에서 큐가 필요한
+<br>이유를 살펴보겠습니다.
+<br>TCP/IP에서 패킷을 통해서 통신이 이루어진다고 했는데 여러 경로를 거쳐서 도달하는 패킷은
+<br>라우터를 거칠 때마다 분해될 확률이 높아집니다. 이러한 것을 단편화라 하는데 많은 TCP
+<br>기반의 패킷은 순서는 지켜지지만 원래 송신할 때보다 더 작은 패킷으로 나누어 도착할 가능
+<br>성이 높아 이를 최초 컴퓨터를 떠날 때의 모양으로 다시 복원 하는 알고리듬을 만들어야
+<br>합니다. 여기에 적합한 자료구조가 큐입니다. 큐를 이용하면 패킷이 단편화 되더라도 도착한
+<br>순서대로 분해된 패킷을 조합하면 원래의 패킷을 만들어 낼 수 있습니다.
+<br>
+<br>다음으로 온라인 게임의 실행을 살펴 봅시다. 두 사람 이상이 경쟁을 하는 게임에서 서버는
+<br>클라이언트에서 보낸 패킷 중 먼저 도착한 패킷을 처리해 주는 것이 당연합니다. 서버는
+<br>여러 접속자가 보낸 패킷을 받는데 패킷을 받은 순서대로 클라이언트의 요청을 처리해야
+<br>하므로 도착 순서에 따른(동기화) 메시지를 저장할 자료구조로 큐를 이용하게 됩니다.
+<br>
+<br>네트워크에서는 단순한 큐를 사용하지 않고 머리와 꼬리가 이어진 원형 큐를 사용합니다.
+<br>원형 큐는 사용 메모리의 크기가 고정되어 있어서 기억 공간의 효율이 높습니다. 또한
+<br>네트워크에서 중요한 내용 중에 하나가 입/출력 데이터의 동기화 입니다. 동기화를 위해서
+<br>Lock/Unlock 작동이 빈번이 일어나는데 이는 데이터 처리 속도 저하의 원인이 됩니다.
+<br>그런데 원형 큐를 이용하면 한쪽에서는 데이터를 채우기(Write: 쓰기)만 하고 다른 한
+<br>쪽에서는 데이터를 꺼내오기(Read: 읽기)만 할 수 있는 구조로 만들 수가 있어서 Lock/Unlock
+<br>의 작동을 어느 정도 피할 수 있어서 속도의 이득을 볼 수 있습니다.
+<br>
+<br>이상 게임에서 사용되는 큐에 대한 내용을 간단히 살펴보았습니다. 좀 더 자세한 내용은 다른
+<br>자료나 책들을 참고 하고 먼저 가장 간단한 선형 큐를 만들어 봅시다.
+<br>
+<br><a href="https://github.com/3dapi/dv05_netlib/raw/master/nw21_Queue1_Linear.zip">nw21_Queue1_Linear.zip</a>
+<br>
+<br>
+<br>선형 큐의 장점은 구현하기는 쉬우나 데이터를 꺼내갈 때(Dequeue) Front 방향으로 데이터를
+<br>이동시키는 복사에 대한 오버헤드가 크다는 것입니다. 이를 극복하기 위해 원형 큐로 수정을
+<br>해봅시다.
+<br>
+<br><a href="https://github.com/3dapi/dv05_netlib/raw/master/nw21_Queue2_Circular.zip">nw21_Queue2_Circular.zip</a>
+<br>
+<br>
+<br>원형큐는 코드의 알고리듬이 얼렵지만 front 방향으로 데이터의 이동이 일어나지 않습니다.
+<br>좀 더 게임에서 사용되는 예는 다음과 같을 수 있습니다.
+<br>
+<br><a href="https://github.com/3dapi/dv05_netlib/raw/master/nw21_Queue3_Messsage.zip">nw21_Queue3_Messsage.zip</a>
+<br>
+<br>
+<br>원형 큐를 만들었는데 이의 활용도를 높이기 위해서는 Template으로 전환하는 것이 좋습니다.
+<br>예를 들어 만약 네트워크의 메시지들을 원형 큐에 저장한다고 생각해 봅시다. 그런데 이것이
+<br>서버마다 특성이 있어 메시지에 포함될 자료구조가 달라진다면 그 자료구조에 따른 원형 큐를
+<br>전부 만들어야 합니다. 이것은 낭비가 아닐 수 없습니다. 따라서 Template로 원형 큐
+<br>자료구조를 만든다면 좀 더 구조적인 프로그램이 될 수 있습니다.
+<br>원형 큐를 Template로 만드는 것은 의외로 간단합니다.
+<br>
+<br><a href="https://github.com/3dapi/dv05_netlib/raw/master/nw21_Queue4_Circular_t.zip">nw21_Queue4_Circular_t.zip</a>
+<br>
+<br>
+<br>
+<br><h2>2. Ring Buffer</h2>
+<br>네트워크의 처리는 수 ~ 1/1000 초 단위이고 CPU는 1/1000000 초 이하 단위입니다. 대충 처리
+<br>속도가 수 백에서 수 만 배 차이가 난다고 볼 수 있습니다. 이러한 이유로 게임프로그램은
+<br>가능하면 패킷의 크기와 주고 받는 횟수를 줄이도록 노력을 합니다. 만약 네트워크의 통신에서
+<br>패킷의 크기가 고정되어 있으면 프로그램이 쉽지만 필요 없는 데이터까지 입/출력에 포함되어
+<br>있어서 네트워크의 성능을 떨어뜨립니다. 따라서 가변적인 크기를 가진 패킷을 사용하는데
+<br>가변 크기를 가진 패킷을 저장하기 위해 링 버퍼(Ring Buffer)라는 자료구조를 사용합니다.
+<br>또한 링 버퍼는 분해된 패킷을 합치거나 완성되지 않은 자투리 패킷을 완전한 패킷으로 만들
+<br>수 있는데 편리합니다.
+<br>
+<br>링 버퍼(Ring Buffer)는 원형 큐의 한 종류 입니다. 이전의 메시지 큐와 링 버퍼의 차이는
+<br>메시지 큐는 메시지라는 크기가 일정한 데이터를 처리한다면 링 버퍼는 가변적인 데이터를
+<br>처리합니다.
+<br>
+<br>링 버퍼는 원형 큐를 살짝 개량하면 됩니다. 원형 큐는 메시지라는 자료구조가 필요하지만
+<br>링 버퍼는 이러한 것이 필요 없고 Byte 단위로 저장할 공간만 있으면 됩니다. 종종 완성된
+<br>패킷과 패킷을 구분하는 마커(Marker)도 사용하는 경우도 있는데 여기서는 완성된 패킷 안에
+<br>마커를 추가하도록 하고 패킷 디자인에서 살펴보도록 하겠습니다.
+<br>
+<br>먼저 가변적인 데이터를 처리할 수 있는 선형큐를 만들어 봅시다.
+<br>
+<br><a href="https://github.com/3dapi/dv05_netlib/raw/master/nw21_Queue4_String.zip">nw21_Queue4_String.zip</a>
+<br>
+<br>
+<br>이러한 선형 큐를 링 버퍼로 전환해 봅시다.
+<br>
+<br><a href="https://github.com/3dapi/dv05_netlib/raw/master/nw21_Queue5_Ringbuffer.zip">nw21_Queue5_Ringbuffer.zip</a>
+<br>
+<br>
+<br>
+<br><h2>3. Packet Design</h2>
+<br>패킷 처리는 송신 보다는 수신 부분에서, 특히, 분해된 패킷에 대해서 더 많은 신경을 써야
+<br>합니다. 예를 들어 recv함수를 이용해서 데이터를 처리할 경우를 생각해 봅시다. 이 함수는
+<br>단순하게 수신된 패킷 만을 돌려줄 뿐, 패킷이 도중에 분해되었더라면 이를 하나로 원래의
+<br>패킷으로 합쳐서 원래의 형태로 돌려주지 않는다는 것입니다.
+<br>이를 해결하기 위해 앞서서 링 버퍼가 필요했습니다. 하지만 단순하게 패킷을 링 버퍼에
+<br>채우기만 하면 다른 패킷과 섞일 수도 있고, 완성되지 않은 패킷 가지고 데이터를 처리할
+<br>수 있을 수도 있습니다. 이러한 문제를 해결하기 위해서 패킷 디자인이 필요한 것입니다.
+<br>
+<br>가장 간단한 패킷의 구조는 패킷을 보낼 때 패킷의 길이를 패킷의 맨 앞에 써서 보내는 방법이
+<br>있습니다. 패킷의 길이는 대부분 2Byte를 사용합니다. 이것은 TCP에서 패킷의 최대 크기가
+<br>65536 Byte까지 설정할 수 있기 때문입니다. 실질적으로는 이더넷 표준을 따라야 하므로 대략
+<br>1400 Byte가 최대 크기이고 따라서 길이로 사용되는 2Byte를 대부분 사용합니다.
+<br>
+<br>종종 패킷 자체의 크기 보다 주고 받는 횟수가 많을 때 1Byte를 사용하기도 하기도 하고
+<br>가끔씩 4Byte 도 사용합니다. 이것은 패킷의 크기가 수십에서 수백 바이트라면 1~4의 차이는
+<br>크기 않기 때문입니다.
+<br>2Byte를 패킷의 길이로 사용한 패킷의 구조는 다음과 같이 됩니다.
+<br>
+<br>
+<br>+-----------+-----------
+<br>|길이(2Byte) | 패킷 메시지
+<br>+-----------+-----------
+<br>
+<br>
+<br>이 구조는 만들기도 편하고 간단하지만 패킷 메시지를 올바로 처리하기 위해서 메시지의 내용을
+<br>문자열로 구성해야 된다는 약점이 있습니다. 이를 간단히 해결한 것이 패킷 메시지 앞에 패킷의
+<br>종류(Type)를 기록하는 구조입니다.
+<br>
+<br>
+<br>+-----------+-----------+------------
+<br>|길이(2Byte) | 종류(4Byte) | 패킷 메시지
+<br>+-----------+-----------+------------
+<br>
+<br>
+<br><a href="https://github.com/3dapi/dv05_netlib/raw/master/nw22_PacketEncode.zip">nw22_PacketEncode.zip</a>
+<br>
+<br>
+<br>이런 구조는 종류에 따라서 패킷 메시지를 쉽게 처리할 수 있으므로 단순하면서 강력한 구조로
+<br>가장 많이 사용됩니다. End 마커까지 포함된 최종 패킷의 구조는 다음과 같습니다.
+<br>
+<br>
+<br>+-----------+-----------+-----------+----------
+<br>|길이(2Byte) | 종류(4Byte) | 패킷 메시지 | End 마커
+<br>+-----------+-----------+-----------+----------
+<br>
+<br>
+<br>이 구조의 약점은 모든 패킷의 구조가 일정해서 보안에 취약합니다. 보안까지 신경 쓴 패킷
+<br>디자인은 이 과정의 한도를 넘기 때문에 여기서는 다루지 않겠습니다.
+<br>
+<br>
+<br>
+<br><h2>4. 소켓의 주요 옵션들</h2>
+<br>
+<br>네트워크에서 소켓에 관련된 중요한 몇 가지 옵션들을 살펴 보겠습니다. 소켓 옵션은
+<br>소켓 함수의 기본 동작을 변경(소켓 옵션 레벨)하거나 프로토콜에 대해서 세부적인 제어
+<br>(프로토콜 레벨)를 위해서 만들어져 있습니다. 함수의 원형은 다음과 같습니다.
+<br>
+<pre>
+	int setsockopt(SOCKET s, int level, int optname, const char FAR * optval, int optlen);
+	int getsockopt(SOCKET s, int level, int optname, const char FAR * optval, int optlen);
+</pre>
+<br>
+<br>먼저 소켓 레벨의 옵션을 살펴 보겠습니다.
+<br>
+<br>
+<br>- REUSEADDR
+<br>
+<br>이 옵션은 지역 주소(IP 주소, 포트 번호) 재사용 허용하기 위한 옵션입니다. 소켓을
+<br>종료하고 나서도 일정 시간 동안은 바인딩이 되지 않습니다. 만약 소켓을 자주 테스트
+<br>하는 경우라면 이 옵션을 활성화 해서 대기의 시간을 조금이라도 줄이는 것이 좋습니다.
+<br>
+<br>사용법은 다음과 같습니다.
+<br>
+<pre>
+	BOOL	bReUse = TRUE;
+	setsockopt(SOCKET s, SOL_SOCKET, SO_REUSEADDR, (const char*)&bReUse, sizeof(BOOL));
+</pre>
+<br>
+<br>-SO_LINGER
+<br>
+<br>이 옵션은 소켓을 종료할 때 전송하고 있는 데이터가 있다면 정해진 시간 동안 지연합니다.
+<br>따라서 대기 시간 없이 종료를 하는 경우 다음과 같이 처리하면 됩니다.
+<br>
+<pre>
+	LINGER  stLinger={1,0};
+	setsockopt(SOCKET s , SOL_SOCKET, SO_LINGER, (const char*)&stLinger, sizeof(LINGER));
+</pre>
+<br>
+<br>다음으로 프로토콜 레벨입니다.
+<br>
+<br>
+<br>-TCP_NODELAY
+<br>
+<br>이 옵션은 Nagle 알고리듬을 정지 시킵니다. 네트워크의 입출력의 량은 컴퓨터의 입출력에
+<br>비해서 상당히 적은 대신에 시간이 많이 걸립니다. Nagle 알고리듬은 일정량의 패킷을
+<br>모아서 한꺼번에 전송하는 방식입니다. 이렇게 하면 네트워크의 트래픽을 어느 정도 줄일
+<br>수 있습니다. FPS 게임처럼 종종 전송하는 크기보다 전송 횟수가 더 중요할 때가 있습니다.
+<br>이러한 경우 Nagle 알고리듬을 꺼두어야 합니다.
+<br>
+<br>Nagle 알고리듬을 비활성화 하는 방법은 다음과 같습니다.
+<br>
+<pre>
+	BOOL bNagle =1; // Nagle 알고리즘 작동 중지
+	setsockopt(SOCKET s , IPPROTO_TCP, TCP_NODELAY, (char*)&bNagle, sizeof bNagle);
+</pre>
+<br>
+<br>소켓함수 이외에 또한 중요한 함수가 shutdown() 함수 입니다. 이 함수는 소켓을 종료할 때
+<br>송신, 수신을 무조건 중지 시킵니다. 사용법은 다음과 같습니다.
+<br>
+<pre>
+	shutdown(SOCKET s , SD_BOTH);
+</pre>
+<br>
+<br>이상 소켓에 관련된 주요 함수와 옵션들을 살펴보았습니다. 이외에 그리 많지 않은 소켓관련
+<br>함수가 있으니 꼭 한번씩 살펴보기 바랍니다.
+<br>
+<br><A href="https://github.com/3dapi/dv05_netlib/raw/master/nw22_NetLib1.zip">nw22_NetLib1.zip</A>
+<br>
+<br>
+<br><h2>5. Network Interface Design</h2>
+<br>라이브러리는 일종의 미리 컴파일된 코드라 할 수 있습니다. 라이브러리 설계에서 가장 어려운
+<br>부분이 인터페이스 입니다. 많은 프로그래머들이 경험과 지식에 의해서 인터페이스를 작성하게
+<br>되는데 인터페이스는 라이브러리를 사용하는 대상, 적용 분야에 따라서 설계의 방향이 달라질
+<br>수 있어서 가장 잘 구성된 인터페이스의 기준은 정하기가 어렵습니다.
+<br>여기서 제안한 내용도 다른 곳에서는 안 맞을 수도 있고 비효율적일 수 있다는 것을
+<br>염두(Keeping in mind)해 두기 바랍니다.
+<br>
+<br>대략 인터페이스의 설계는 프로그램언어 설계와 많이 유사합니다. 따라서 언어 설계의 원칙 중
+<br>일부를 인터페이스 설계의 원칙으로 수용해도 됩니다. 여러 가지 원칙 중에서 초보 프로그래머에게
+<br>강조 하고 싶은 부분은 인터페이스의 일관성과 보편성 그리고 편리성입니다.
+<br>
+<br>일관성이라는 것은 꽤나 광범위한데 속성(변수, 함수, 클래스 등)과 속성(이름, 값, 범위,
+<br>생명 시간등)이 갖는 성질들의 일관, 인수 리스트의 순서와 같은 일관성 등 주로 코드에서
+<br>사용자가 한 번 익숙해지면 다음 새로운 인터페이스가 와도 이를 유추해 낼 수 있을 정도를
+<br>말합니다.
+<br>
+<br>보편성은 사람이 일상적으로 사용되는 상식적인 언어 또는 컴퓨터 상에서 일반적으로 적용되는
+<br>내용입니다. 예를 들어 객체를 왼쪽으로 회전하도록 명령하는 것을 인터페이스로 만들었는데
+<br>코드 내부에서는 객체를 오른쪽으로 회전하도록 코딩 되어 있으면 안되지요.
+<br>이러한 것은 코드의 구현 내용이나 속성을 설정하는 것에도 적용됩니다.
+<br>편리성은 사용하기 편리해야 된다는 것입니다. 이 것은 마치 서너 개의 버튼으로 텔레비전의
+<br>채널이나 볼륨, 화질 등을 설정하듯 사용자가 라이브러리의 내부구조를 알 수 없어도 사용할
+<br>수 있도록 단순하고 편리해야 합니다. 아무리 내부코드가 잘 구성되어 있더라도 편리성이
+<br>떨어지면 만들 사람만 쓰고 결국 아무도 쓰지 않는 라이브러리가 될 것입니다.
+<br>
+<br>이 외에 인터페이스 설계에서 또한 무시할 수 없는 것이 사용자의 프로그램 명세(Specification)
+<br>입니다. 아무리 편리하고 좋은 기능이 있어도 사용자가 필요로 하지 않는 것을 만드는 것은
+<br>시간과 노동력의 낭비일 뿐입니다. 프로그램 명세는 원칙적으로 상세히 기술 할수록 프로그램
+<br>작성이 쉬울 수 있지만 이 또한 많은 시간이 필요하므로 라이브러리를 간단한 내용을 가지고
+<br>구성하는 하도록 하겠습니다. 또한 구현 코드의 원칙을 다음과 같이 세워서 라이브러리를
+<br>만들어 봅시다.
+<br>
+<br>1. 인터페이스는 이를 상속받는 클래스에서 가장 보편적으로 사용되는 함수들을 순수 가상함수로
+<br>구성하고 되도록이면 가상함수의 수는 꼭 필요한 수만 갖도록 한다.
+<br>2. 특수하게 사용되는 함수나 변수에 대한 처리는 Query라는 함수를 통해서 처리한다.
+<br>3. 다중 상속은 허용한다.
+<br>4. 코드에서 변수와 함수의 이름은 헝가리언 룰에 따른다.
+<br>5. 모든 객체는 각자 정한 인터페이스 클래스를 상속받는다
+<br>6. 객체의 생성은 함수를 통해서 인수를 받아 생성하고, 소멸은 delete 연산자 만을 통해서 소멸시킨다.
+<br>
+<br>
+<br>TCP의 경우 클라이언트는 소켓 모델의 종류에 상관없이 소켓 생성→접속→입/출력→소켓 종료 순으로
+<br>되고, 서버의 경우 소켓 생성→바인드→리슨→Accept→입/출력→소켓 종료 순으로 진행이 됩니다.
+<br>
+<br>이를 인터페이스 구조에 적용한다면 다음과 같이 됩니다.
+<br>
+<pre>
+	Interface ILcNet
+	{
+		pure virtual SocketCreate(…);
+		pure virtual SocketClose(…);
+		pure virtual Connect(…);
+		pure virtual Bind(…);
+		pure virtual Listen(…);
+		pure virtual Accept(…);
+		pure virtual Send(…);
+		pure virtual Recv(…);
+
+		pure virtual WhileProcess(…);
+	};
+</pre>
+<br>
+<br>이 구조를 그대로 사용해도 되지만 사용자의 편리성을 생각해 본다면 서버나 클라이언트나 둘
+<br>다 생성하고 Bind나 Connect는 Create와 같은 함수 내부에서 처리하는 루틴으로 볼 수 있습니다.
+<br>즉 위의 구조는 단순한게 다음 구조로 만들어 갈 수 있습니다.
+<br>
+<pre>
+	Interface ILcNet
+	{
+		pure virtual Create(…);
+		pure virtual Destroy (…);
+		pure virtual FrameMove (…);
+		pure virtual Send(…);
+		pure virtual Recv(…);
+	};
+</pre>
+<br>
+<br>이 인터페이스는 클라이언트는 Create() 함수 내부에서 Connection이 이루어지고, 서버의
+<br>경우 Create()함수 내부에서 Bind 와 Listen 이 이루어지도록 하기 위해서 입니다.
+<br>(FrameMove ()함수 ? WhileProcess() 와 서버의 경우 Accept 처리)
+<br>단순하게 프로그램 명세만 그대로 코딩해도 좋지만 이와 같이 편리성과 일관성을 생각해
+<br>반발짝 앞서 코딩하도록 하는 것이 더욱 좋아 보입니다.
+<br>
+<br>그런데 사용자 명세가 변경이 되어 소켓을 가져오는 함수가 필요할 경우를 생각해봅시다.
+<br>먼저 라이브러리를 만든 사람은 이 함수를 추가하는 것은 그리 어려운 일이 아니라서 그냥
+<br>인터페이스에 다음과 같이 추가할 수 있습니다.
+<br>
+<pre>
+	Interface ILcNet
+	{
+		…
+		pure virtual GetSocket();
+	};
+</pre>
+<br>
+<br>또 사용자 명세가 바뀌어 다른 함수가 추가할 필요가 있다면
+<br>
+<pre>
+	Interface ILcNet
+	{
+		…
+		pure virtual GetSocket();
+		pure virtual Another();
+	};
+</pre>
+<br>
+<br>과연 이것이 올바를 설계일까요? 그렇지 않습니다. 앞서도 가장 사용빈도가 높은 함수를
+<br>가상함수로 만들어서 최상위 인터페이스 클래스에 작성한다고 했는데 이것은 미래를
+<br>내다보고 만들어야 하지만 때로는 이 인터페이스를 만들어 놓고 나서 결정할 문제이기도
+<br>합니다.
+<br>이렇게 결정하기 힘이 드는 경우 이러한 내용들을 묶어서 Query() 함수로 질의어 형식을
+<br>통해서 객체의 내부 데이터 입/출력을 하는 방안을 생각할 수 있습니다.
+<br>
+<pre>
+	Interface ILcNet
+	{
+		pure virtual Create(…);
+		pure virtual Destroy (…);
+		pure virtual FrameMove (…);
+		pure virtual Send(…);
+		pure virtual Recv(…);
+		pure virtual Query (…);
+	};
+</pre>
+<br>
+<br>이렇게 해놓으면 명세가 바뀌더라도 얼마든지 구현할 수 있고 또한 라이브러리 버전을
+<br>갱신할 때 인터페이스 변경에 이를 반영할 수도 있습니다.
+<br>
+<br>결정이 안되어 있거나 애매한 명세는 Query() 함수 내부에서 처리한다는 원칙이 필요한
+<br>것입니다.
+<br>
+<br>앞서 객체는 함수를 통해서 생성된다고 했는데 이를 다음과 같이 구현합니다.
+<br>
+<pre>
+	INT LcNet_Create__( “Command”, ILnNet** pOut_put, void* 인수1, void* 인수2, …);
+</pre>
+<br>
+<br>결과 값은 성공의 경우 0보다 크거나 같은 값을 반환할 것이고, 실패할 경우 음수 값을
+<br>반환하도록 구성합니다. 이 부분은 다음 장에서 자세히 다루도록 하겠습니다.
+<br>
+<br>만약 TCP용 서버에 대한 함수 원형을 만든다면
+<br>
+<pre>
+	INT LcNet_CreateTcpServer(char* sCmd			// 모델 이름
+				 , ILnNet** pData
+				 , void* p1			// IP
+				 , void* p2			// Port
+				 );
+</pre>
+<br>
+<br>으로 만들고 이를 사용할 경우 다음과 같이 구성합니다.
+<br>
+<pre>
+	INT hr = LcNet_CreateTcpServer(“IOCP”, &pNet, , NULL, “20000”);
+
+	if(FAILED(hr))
+		Error Process ...;
+</pre>
+<br>
+<br>이것으로 인터페이스 디자인에 대한 간단한 설명을 마치겠습니다. 자세한 내용은 다음
+<br>장부터 진행합니다.
+<br>
+<br>
+<br>
+<br><h2>6. I/O 모델에 따른 계층구조</h2>
+<br>여러 네트워크 I/O 모델 중에서 Async Select, Event Select, IOCP 세 모델 만을 가지고
+<br>라이브러릴 만들 것인데 이들의 계층구조를 UML로 표현 한다면 다음과 같습니다.
+<br>
+<br>
+<IMG src="https://github.com/3dapi/dv05_netlib/raw/master/img_netlib/nwnet.png" BORDER="0">
+<br>
+<br>
+<br><A href="https://github.com/3dapi/dv05_netlib/raw/master/nw22_NetLib2.zip">nw22_NetLib2.zip</A>
+<br>
+<br>
+<br>
+<br><h2>7 Database</h2>
+<br>네트워크 라이브러리를 구축하는 마지막 단계로 Database 처리입니다. 데이터베이스를
+<br>처리하는 프로그램과 네트워크 엔진과는 별개입니다. 하지만 사용자에 대한 모든 정보를
+<br>개별 파일로 저장하지 않고 데이터베이스 시스템을 이용하는 것이 여러 가지 면에서
+<br>이점이 많아 요즘은 서버프로그램에서 데이터베이스에 대한 프로그램까지 병행을 합니다.
+<br>
+<br>데이터베이스에 저장되는 데이터는 이익에 관련 되므로 기획자가 분석하고 설계를 해야
+<br>합니다. 프로그래머는 설계가 끝난 데이터베이스를 가지고 쿼리를 통해서 데이터를
+<br>처리하거나 출력하기만 하면 됩니다.
+<br>
+<br>프로그래머가 데이터베이스 시스템을 접근 하기 위한 방법은 마이크로소프트 운영체제의
+<br>경우 보통 ODBC(Open Data Base Connectivity)를 이용한 방법과
+<br>OLE-DB(Object Linking and Embedding, Database)를 이용한 방법 2가지를 활용합니다.
+<br>
+<br>ODBC는 여러 데이터베이스에 대한 표준적인 인터페이스라 생각하면 됩니다. 즉 사용자는
+<br>데이터베이스를 블랙박스라 생각하고 정해진 인터페이스를 통해서 데이터를 처리합니다.
+<br>ODBC에 대한 연결과 관리는 데이터베이스 벤더(Vendor)들에 의해 공급이 되므로 새로운
+<br>데이터베이스를 ODBC를 사용하기에는 불편함이 거의 없습니다.
+<br>
+<br>OLE-DB는 ODBC를 발전시켜 SQL 데이터와 메일, 텍스트, 비디오 등 비 SQL적인 데이터들의
+<br>처리와, 접근 속도를 향상시킨 버전이라 생각하면 됩니다. 따라서 OLE-DB가 ODBC보다 처리
+<br>속도가 빠르다고 알려져 있으나 ODBC는 내부적으로 OLE-DB를 사용하고 있고, 또한 계속
+<br>개선이 이루어져 속도에 차이에 오는 체감은 별로 없다고 개발자들은 말합니다.
+<br>
+<br>데이터 베이스에 대한 프로그램 순서는 다음과 같습니다.
+<br>
+<br>서버개체생성 -> 접속 -> 질의 -> 실행 -> 접속종료
+<br>
+<br>ODBC에 대한 서버의 환경설정은 SQLAllocHandle() 함수 와 SQLSetEnvAttr() 함수 두 함수로
+<br>다음과 같이 설정합니다.
+<br>
+<pre>
+	// 환경 핸들 할당, 버전 속성 설정.
+	SQLAllocHandle(SQL_HANDLE_ENV,SQL_NULL_HANDLE,&m_hEnv);
+	SQLSetEnvAttr(m_hEnv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, SQL_IS_INTEGER);
+
+	// 연결 핸들 할당.
+	SQLAllocHandle(SQL_HANDLE_DBC, m_hEnv, &m_hDbc);
+</pre>
+<br>
+<br>데이터베이스의 접속에 대한 방법은 두 가지가 있는데 원격 접속에 대한 DSN, SQL 서버에
+<br>대한 접속은 SQLConnect() 함수를 통해서 접속을 하고 엑셀 파일, MDB파일과 같이 응용
+<br>프로그램과 같은 컴퓨터 내부에 있는 파일 시스템에 대한 접속에 대해서는 SQLDriverConnect()
+<br>함수를 통해서 접속을 합니다. 다음은 접속에 대한 두 가지 코드 입니다.
+<br>
+<pre>
+	// DSN, SQL서버의 경우
+	hr=SQLConnect( , , , ,);
+	// 명령 핸들을 할당.
+	hr = SQLAllocHandle(, ,);
+
+	// 엑셀 파일의 경우
+	sprintf(InCon,"DRIVER={Microsoft Excel Driver (*.xls)};DBQ=%s;", sFile);
+	// MDB 파일의 경우
+	sprintf(InCon,"DRIVER={Microsoft Access Driver (*.mdb)};DBQ=%s;", sFile);
+
+	hr=SQLDriverConnect( , , , ,);
+	// 명령 핸들을 할당.
+	hr = SQLAllocHandle(, ,);
+</pre>
+<br>
+<br>접속이 완료되었으면 데이터베이스를 사용할 수 있습니다. 데이터베이스는 SQL
+<br>(Structured Query Langauge, 구조화 질의어: 시큐얼)이라는 언어를 통해서 데이터베이스를
+<br>관리하거나 저장되어 있는 자료를 처리합니다.
+<br>(SQL 언어와 관련된 내용은 Database 관련 책들을 참고 하기 바랍니다.)
+<br>
+<br>먼저 데이터베이스에 질의어를 전달하고 데이터베이스는 이를 처리합니다. 데이터베이스에
+<br>처리된 결과는 대부분 여러 개의 경우로 출력이 되므로 다음과 같이 코드를 작성합니다.
+<br>
+<pre>
+	// 질의어 실행
+	SQLExecDirect(m_hStm, sSQL, SQL_NTS);
+
+	// 열의 숫자를 받아 온다.
+	SQLNumResultCols(m_hStm, &m_nField);
+
+	// 결과를 돌려받기 위한 바인딩
+	for()
+	{
+		SQLBindCol(,,,,,);
+	}
+
+	// 결과 집합들을 가져옴
+	SQLFetch(m_hStm);
+</pre>
+<br>
+<br>SQLFetch()함수는 SQLExecDirect()함수가 처리한 결과를 가져오는 함수로, 처리된 결과가
+<br>여러 개의 경우 이 함수의 호출이 실패할 때까지 반복해서 불러 주어야 데이터를 가져올
+<br>수 있습니다.
+<br>
+<br>대충 ODBC에 대한 사용법을 훑어 보았는데 전체 코드는 다음 예제를 참고 하기 바랍니다.
+<br>
+<br>
+<br><A href="https://github.com/3dapi/dv05_netlib/raw/master/nw23_DB.zip">nw23_DB.zip</A>
+<br>
+<br>
+
+</div>
+
+<?php
+	include '../base/lc_tail.php';
+?>
