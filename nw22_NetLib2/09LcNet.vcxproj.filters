@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3683ac6f-b084-4699-a580-4ac505a7434d}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{bdd60ee5-d792-4416-bd4f-01c8fae4237c}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ILcNet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LcNet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LcNetIocp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LcNetSlct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LcNetSlctA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LcNetSlctE.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LcNetUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ILcNet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LcNet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LcNetIocp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LcNetSlct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LcNetSlctA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LcNetSlctE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LcNetUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
