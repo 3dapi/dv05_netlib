@@ -11,24 +11,24 @@
 
 CLcNet::CLcNet()
 {
-	m_scH		= 0;
-	memset(&m_sdH, 0, sizeof m_sdH);
+    m_scH       = 0;
+    memset(&m_sdH, 0, sizeof m_sdH);
 
-	m_PtcType	= NETPRT_NONE;		// Protocol type
-	m_HstType	= NETHST_NONE;		// Client Server?
+    m_PtcType   = NETPRT_NONE;      // Protocol type
+    m_HstType   = NETHST_NONE;      // Client Server?
 
-	m_nThConn	= 0;
+    m_nThConn   = 0;
 }
 
 CLcNet::~CLcNet()
 {
-	Destroy();
+    Destroy();
 }
 
 
 INT CLcNet::Create(void* p1, void* p2, void* p3, void* p4)
 {
-	return 0;
+    return 0;
 }
 
 
@@ -39,13 +39,13 @@ void CLcNet::Destroy()
 
 INT CLcNet::FrameMove()
 {
-	return 0;
+    return 0;
 }
 
 
 INT CLcNet::Query(char* sCmd, void* pData)
 {
-	return 0;
+    return 0;
 }
 
 
@@ -53,86 +53,86 @@ INT CLcNet::Query(char* sCmd, void* pData)
 
 INT CLcNet::Close()
 {
-	return 0;
+    return 0;
 }
 
 INT CLcNet::Listen()
 {
-	return 0;
+    return 0;
 }
 
 
 INT CLcNet::Connect(char* sIp, char* sPort)
 {
-	return 0;
+    return 0;
 }
 
 
 INT CLcNet::Send(const char* pSrc, INT  iSnd, DWORD  dMsg, SOCKET  scH)
 {
-	return 0;
+    return 0;
 }
 
 INT CLcNet::Recv(char* pDst, INT* iRcv, DWORD* dMsg, SOCKET* scH)
 {
-	return 0;
+    return 0;
 }
 
 INT CLcNet::IsConnect()
 {
-	return m_nThConn;
+    return m_nThConn;
 }
 
-LRESULT	CLcNet::MsgProc(HWND, UINT, WPARAM, LPARAM)
+LRESULT CLcNet::MsgProc(HWND, UINT, WPARAM, LPARAM)
 {
-	return -1;
+    return -1;
 }
 
 
 DWORD WINAPI CLcNet::ThreadRecv(void* pParam)
 {
-	return ((CLcNet*)pParam)->ProcRecv(pParam);
+    return ((CLcNet*)pParam)->ProcRecv(pParam);
 }
 
 
 DWORD WINAPI CLcNet::ThreadSend(void* pParam)
 {
-	return ((CLcNet*)pParam)->ProcSend(pParam);
+    return ((CLcNet*)pParam)->ProcSend(pParam);
 }
 
 
 DWORD WINAPI CLcNet::ThreadAccp(void* pParam)
 {
-	return ((CLcNet*)pParam)->ProcAccp(pParam);
+    return ((CLcNet*)pParam)->ProcAccp(pParam);
 }
 
 
 DWORD WINAPI CLcNet::ThreadWork(void* pParam)
 {
-	return ((CLcNet*)pParam)->ProcWork(pParam);
+    return ((CLcNet*)pParam)->ProcWork(pParam);
 }
 
 
 DWORD CLcNet::ProcRecv(void* pParam)
 {
-	return 0;
+    return 0;
 }
 
 
 DWORD CLcNet::ProcSend(void* pParam)
 {
-	return 0;
+    return 0;
 }
 
 DWORD CLcNet::ProcAccp(void* pParam)
 {
-	return 0;
+    return 0;
 }
 
 
 DWORD CLcNet::ProcWork(void* pParam)
 {
-	return 0;
+    return 0;
 }
 
 

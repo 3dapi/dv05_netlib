@@ -14,74 +14,74 @@
 
 int main()
 {
-	srand( (unsigned)time( nullptr ) );
-	
-	std::cout<< "Ling Buffer 연습.\n\n";
+    srand( (unsigned)time( nullptr ) );
 
-	int i;
-	CQueStr*	pQueue = new CQueStr(45);
+    std::cout<< "Ling Buffer 연습.\n\n";
 
-	char	str[] =
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
+    int i;
+    CQueStr*    pQueue = new CQueStr(45);
 
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
+    char    str[] =
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
 
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		"12345678901234567890abcdefghijabcdefghij"\
-		;
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
 
-	printf("         12345678901234567890abcdefghijabcdefghij\n");
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
 
-	for(i=0; i<1024; ++i)
-	{
-		char	sBuf[128]={0};
-		int		iSize = 10 + rand()%20;
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
 
-		strncpy(sBuf + 1, str+i, iSize);
-		iSize = strlen(sBuf+1) +1;
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
 
-		sBuf[0] = iSize;
-		pQueue->Enqueue(sBuf, sBuf[0]);
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        "12345678901234567890abcdefghijabcdefghij"\
+        ;
 
-		memset(sBuf, 0, sizeof(sBuf));
-		pQueue->Dequeue(sBuf, &iSize);
+    printf("         12345678901234567890abcdefghijabcdefghij\n");
 
-		iSize -= 1;
+    for(i=0; i<1024; ++i)
+    {
+        char    sBuf[128]={0};
+        int     iSize = 10 + rand()%20;
 
-		printf("%3d, (%2d)%s\n", i, iSize, sBuf+1);
-	}
-//	pQueue->Dequeue();
+        strncpy(sBuf + 1, str+i, iSize);
+        iSize = strlen(sBuf+1) +1;
 
-	delete pQueue;
+        sBuf[0] = iSize;
+        pQueue->Enqueue(sBuf, sBuf[0]);
 
-	return 0;
+        memset(sBuf, 0, sizeof(sBuf));
+        pQueue->Dequeue(sBuf, &iSize);
+
+        iSize -= 1;
+
+        printf("%3d, (%2d)%s\n", i, iSize, sBuf+1);
+    }
+//  pQueue->Dequeue();
+
+    delete pQueue;
+
+    return 0;
 }

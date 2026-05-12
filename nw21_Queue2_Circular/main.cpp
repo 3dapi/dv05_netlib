@@ -8,29 +8,29 @@
 
 int main()
 {
-	std::cout<< "간단한 원형큐 프로그램.\n\n";
+    std::cout<< "간단한 원형큐 프로그램.\n\n";
 
-	int i,j;
+    int i,j;
 
-	CQueCircular*	pQueue = new CQueCircular(20);
+    CQueCircular*   pQueue = new CQueCircular(20);
 
-	
-	for(i=0; i<10; ++i)
-	{
-		for(j=0; j<30; ++j)
-		{
-			pQueue->Enqueue(i*30 + j);
-		}
+    
+    for(i=0; i<10; ++i)
+    {
+        for(j=0; j<30; ++j)
+        {
+            pQueue->Enqueue(i*30 + j);
+        }
 
-		for(j=0; j<30; ++j)
-		{
-			int iVal = 0;
-			pQueue->Dequeue(&iVal);
+        for(j=0; j<30; ++j)
+        {
+            int iVal = 0;
+            pQueue->Dequeue(&iVal);
 
-			printf("%d\n",iVal);
-		}
-	}
+            printf("%d\n",iVal);
+        }
+    }
 
-	delete pQueue;
-	return 0;
+    delete pQueue;
+    return 0;
 }
